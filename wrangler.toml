@@ -1,0 +1,15 @@
+name = "openlawtools"
+compatibility_date = "2024-01-01"
+
+# Enable Node.js compatibility
+compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration
+pages_build_output_dir = ".next"
+
+[build]
+command = "npm run build"
+
+# Environment variables (if needed)
+[vars]
+# Add any environment variables here
