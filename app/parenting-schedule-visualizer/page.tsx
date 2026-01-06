@@ -403,7 +403,7 @@ const ParentingScheduleVisualizer = () => {
         console.error('Error sending to Google Script:', googleError);
       }
 
-      // console.log('Request Data for PDF:', requestData);
+      //console.log('Request Data for PDF:', requestData);
       const pdfResponse = await fetch(
         'https://api.ovlg.com/v3/api/start/public/index.php/api/forum-lex-pdf-download',
         {
