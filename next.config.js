@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+/* config options here */
+  reactStrictMode: true,
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
   // Add empty turbopack config to silence the warning
   turbopack: {},
   
@@ -28,3 +34,5 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
+
