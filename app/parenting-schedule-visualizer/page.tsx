@@ -292,7 +292,8 @@ const ParentingScheduleVisualizer = () => {
     setIsGenerating(false);
     setShowSuccess(true);
 
-    // console.log('Schedule generated successfully:', scheduleData);
+    console.log('Schedule generated successfully:', scheduleData);
+    console.log('Schedule holidays:', holidays);
 
     // Hide success message after 3 seconds
     setTimeout(() => setShowSuccess(false), 3000);
@@ -402,7 +403,7 @@ const ParentingScheduleVisualizer = () => {
         console.error('Error sending to Google Script:', googleError);
       }
 
-      console.log('Request Data for PDF:', requestData);
+      // console.log('Request Data for PDF:', requestData);
       const pdfResponse = await fetch(
         'https://api.ovlg.com/v3/api/start/public/index.php/api/forum-lex-pdf-download',
         {
