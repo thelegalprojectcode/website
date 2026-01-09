@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar, Users, Info, FileText, Gift, FileDown, Sparkles, CheckCircle2, Clock } from 'lucide-react';
 import ScheduleCalendar from '../components/schedule/ScheduleCalendar';
 import ScheduleStats from '../components/schedule/ScheduleStats';
-import { insertParentingSchedule } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 const ParentingScheduleVisualizer = () => {
   const [startDate, setStartDate] = useState('');
@@ -352,8 +352,7 @@ const ParentingScheduleVisualizer = () => {
 
     setIsDownloading(true);
 
-    try {
-      const requestData = {
+    const requestData = {
         fullName: pdfFormData.fullName,
         email: pdfFormData.email,
         phone: pdfFormData.phone,
@@ -374,67 +373,77 @@ const ParentingScheduleVisualizer = () => {
         currentYear: new Date(startDate).getFullYear()
       };
 
-      const googleForm = document.forms.namedItem('google-sheet');
-      var googleFormData = new FormData(googleForm as HTMLFormElement);
-      var formid = Math.random().toString(36).substring(2, 15);
-      googleFormData.append('id', formid);
-      googleFormData.append('formId', 'forum-and-lex-page');
+    // try {
+    //   const googleForm = document.forms.namedItem('google-sheet');
+    //   var googleFormData = new FormData(googleForm as HTMLFormElement);
+    //   var formid = Math.random().toString(36).substring(2, 15);
+    //   googleFormData.append('id', formid);
+    //   googleFormData.append('formId', 'forum-and-lex-page');
 
-      for (const key in requestData) {
-        // @ts-ignore
-        const val = requestData[key];
-        if (typeof val === 'object') {
-          googleFormData.append(key, JSON.stringify(val));
-        } else {
-          googleFormData.append(key, val);
-        }
-      }
+    //   for (const key in requestData) {
+    //     // @ts-ignore
+    //     const val = requestData[key];
+    //     if (typeof val === 'object') {
+    //       googleFormData.append(key, JSON.stringify(val));
+    //     } else {
+    //       googleFormData.append(key, val);
+    //     }
+    //   }
 
+    //   await fetch(
+    //       'https://script.google.com/macros/s/AKfycbyTREBh9T4Qm2r0XYT8FaIsGazIBdSkOkPV5RoHLjcM3LKkdvh7SDGKb_hZoNJl4Pej/exec',
+    //       {
+    //         method: 'POST',
+    //         mode: 'no-cors',
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //         },
+    //         body: googleFormData,
+    //       }
+    //     );
+    //   } catch (googleError) {
+    //     console.error('Error sending to Google Script:', googleError);
+    //   }
+
+      // Insert data into Supabase directly
       try {
-        await fetch(
-          'https://script.google.com/macros/s/AKfycbyTREBh9T4Qm2r0XYT8FaIsGazIBdSkOkPV5RoHLjcM3LKkdvh7SDGKb_hZoNJl4Pej/exec',
-          {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: googleFormData,
-          }
-        );
-      } catch (googleError) {
-        console.error('Error sending to Google Script:', googleError);
+        // Prepare data for insertion
+        const supabaseData = {
+          full_name: pdfFormData.fullName,
+          case_number: pdfFormData.caseNumber,
+          children_names: childrenNames,
+          phone: pdfFormData.phone,
+          email: pdfFormData.email,
+          holidays: holidays.filter((h: any) => h.enabled),
+          schedule_type: scheduleType,
+          start_date: startDate,
+          effective_date: pdfFormData.effectiveDate,
+          want_consultation: pdfFormData.wantConsultation,
+          zip_code: pdfFormData.zipCode,
+          parent_a_name: parentAName,
+          parent_a_color: parentAColor,
+          parent_b_name: parentBName,
+          parent_b_color: parentBColor,
+          jurisdiction: pdfFormData.jurisdiction,
+        };
+
+        // Insert into parenting_schedules table
+        const { data, error } = await supabase
+          .from('parenting_schedules')
+          .insert([supabaseData])
+          .select();
+
+        if (error) {
+          console.error('Supabase insert error:', error);
+        } else {
+          console.log('Successfully inserted into Supabase:', data);
+        }
+      } catch (supabaseError) {
+        console.error('Error inserting into Supabase:', supabaseError);
+        // Don't block the PDF download if Supabase fails
       }
 
-      // // Insert data into Supabase
-      // try {
-      //   const supabaseData = {
-      //     full_name: pdfFormData.fullName,
-      //     case_number: pdfFormData.caseNumber,
-      //     children_names: childrenNames,
-      //     phone: pdfFormData.phone,
-      //     email: pdfFormData.email,
-      //     holidays: holidays.filter((h: any) => h.enabled),
-      //     schedule_type: scheduleType,
-      //     start_date: startDate,
-      //     effective_date: pdfFormData.effectiveDate,
-      //     want_consultation: pdfFormData.wantConsultation,
-      //     zip_code: pdfFormData.zipCode,
-      //     parent_a_name: parentAName,
-      //     parent_a_color: parentAColor,
-      //     parent_b_name: parentBName,
-      //     parent_b_color: parentBColor,
-      //     jurisdiction: pdfFormData.jurisdiction,
-      //   };
-
-      //   const result = await insertParentingSchedule(supabaseData);
-      //   console.log('Successfully inserted into Supabase:', result);
-      // } catch (supabaseError) {
-      //   console.error('Error inserting into Supabase:', supabaseError);
-      //   // Don't block the PDF download if Supabase fails
-      // }
-
-      //console.log('Request Data for PDF:', requestData); 
+      console.log('Request Data for PDF:', requestData); 
       const pdfResponse = await fetch(
         'https://api.ovlg.com/v3/api/start/public/index.php/api/forum-lex-pdf-download',
         {
