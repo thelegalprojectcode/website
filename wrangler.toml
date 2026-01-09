@@ -10,3 +10,7 @@ pages_build_output_dir = "out"
 # Environment variables (if needed)
 [vars]
 # Add any environment variables here
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://sb.thelegalproject.org"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzY3NTUxNDAwLCJleHAiOjE5MjUzMTc4MDB9.OE1Vup5PQlCsXmDKaJ8wwgi2zovlUMhNc1TNX2YhBsU"
+SUPABASE_DATABASE_URL = "postgresql://postgres:jaikalima%4066526@72.52.93.10:98/postgres"
