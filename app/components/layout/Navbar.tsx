@@ -20,8 +20,8 @@ const Navbar = () => {
                     <Image 
                         src="/logo.svg" 
                         alt="The Legal Project Logo" 
-                        width={32} 
-                        height={32}
+                        width={64} 
+                        height={64}
                         className={styles.logoImage}
                     />
                     <span>TheLegalProject</span>
