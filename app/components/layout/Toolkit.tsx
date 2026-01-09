@@ -59,13 +59,15 @@ const Toolkit = () => {
                   {tool.description}
                 </p>
 
-                <Button 
-                  variant="outline" 
-                  className="w-full border-primary text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
-                >
-                  {tool.cta}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <a href={tool.href} className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    {tool.cta}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </a>
               </CardContent>
             </Card>
           ))}
