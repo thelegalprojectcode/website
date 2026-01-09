@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: 'Democratizing legal help with open source tools.',
 };
 
-import Navbar from './components/Navbar';
+import Navbar from './components/layout/Navbar';
 
 export default function RootLayout({
     children,
