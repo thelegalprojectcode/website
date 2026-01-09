@@ -18,7 +18,7 @@ const Footer = () => {
             <h4 className="font-semibold text-sm mb-4">Tools</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#custody" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="/parenting-schedule-visualizer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Custody Visualizer
                 </a>
               </li>

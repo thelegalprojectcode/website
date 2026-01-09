@@ -8,7 +8,7 @@ const tools = [
     title: "Custody Visualizer",
     description: "Create clear, visual parenting calendars in minutes. Drag, drop, and export a conflict-free schedule for your court filing.",
     cta: "Launch Visualizer",
-    href: "#custody",
+    href: "/parenting-schedule-visualizer",
   },
   {
     icon: Calculator,
