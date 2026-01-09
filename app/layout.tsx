@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     title: 'Open Law Tools',
     description: 'Democratizing legal help with open source tools.',
     icons: {
-        icon: '/favicon.svg',
+        icon: '/favicon.jpg',
     },
 };
 

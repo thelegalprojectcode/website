@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
          <Link href="/" className={styles.logo}>
                     <Image 
-                        src="/logo.jpg" 
+                        src="/logo.svg" 
                         alt="The Legal Project Logo" 
                         width={32} 
                         height={32}
