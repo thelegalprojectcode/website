@@ -27,6 +27,7 @@ const ParentingScheduleVisualizer = () => {
 
   // PDF Download Dialog State
   const [showPdfDialog, setShowPdfDialog] = useState(false);
+  const [showPdfSuccess, setShowPdfSuccess] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [pdfFormData, setPdfFormData] = useState({
     fullName: '',
@@ -458,6 +459,11 @@ const ParentingScheduleVisualizer = () => {
       // window.URL.revokeObjectURL(url);
 
       setShowPdfDialog(false);
+      setShowPdfSuccess(true);
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => setShowPdfSuccess(false), 5000);
+      
       setPdfFormData({
         fullName: '',
         email: '',
@@ -471,7 +477,7 @@ const ParentingScheduleVisualizer = () => {
 
     } catch (error) {
       console.error('Error generating PDF:', error);
-      //alert('Failed to generate PDF. Please try again.');
+      alert('Failed to submit. Please try again.');
     } finally {
       setIsDownloading(false);
     }
@@ -496,6 +502,27 @@ const ParentingScheduleVisualizer = () => {
       </section>
       
       <main className="mx-auto px-4 py-8 max-w-7xl">
+        {/* PDF Success Message */}
+        {showPdfSuccess && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-in fade-in">
+            <Card className="bg-green-50 border-green-200 shadow-2xl max-w-md mx-4 animate-in zoom-in-95">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-900 text-lg mb-2">Success!</h3>
+                    <p className="text-sm text-green-800">
+                      Your parenting schedule has been submitted successfully. We'll send the PDF to your email shortly.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="grid lg:grid-cols-[400px_1fr] gap-6 mb-8">
           {/* Sidebar Form */}
