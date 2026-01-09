@@ -410,8 +410,9 @@ const ParentingScheduleVisualizer = () => {
         console.error('Error inserting into Supabase:', supabaseError);
         // Don't block the PDF download if Supabase fails
       }
+      // console.log('Request Data for PDF:', requestData); 
 
-      console.log('Request Data for PDF:', requestData); 
+    try {
       const pdfResponse = await fetch(
         'https://api.ovlg.com/v3/api/start/public/index.php/api/forum-lex-pdf-download',
         {
