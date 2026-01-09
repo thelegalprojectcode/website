@@ -373,38 +373,6 @@ const ParentingScheduleVisualizer = () => {
         currentYear: new Date(startDate).getFullYear()
       };
 
-    // try {
-    //   const googleForm = document.forms.namedItem('google-sheet');
-    //   var googleFormData = new FormData(googleForm as HTMLFormElement);
-    //   var formid = Math.random().toString(36).substring(2, 15);
-    //   googleFormData.append('id', formid);
-    //   googleFormData.append('formId', 'forum-and-lex-page');
-
-    //   for (const key in requestData) {
-    //     // @ts-ignore
-    //     const val = requestData[key];
-    //     if (typeof val === 'object') {
-    //       googleFormData.append(key, JSON.stringify(val));
-    //     } else {
-    //       googleFormData.append(key, val);
-    //     }
-    //   }
-
-    //   await fetch(
-    //       'https://script.google.com/macros/s/AKfycbyTREBh9T4Qm2r0XYT8FaIsGazIBdSkOkPV5RoHLjcM3LKkdvh7SDGKb_hZoNJl4Pej/exec',
-    //       {
-    //         method: 'POST',
-    //         mode: 'no-cors',
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //         },
-    //         body: googleFormData,
-    //       }
-    //     );
-    //   } catch (googleError) {
-    //     console.error('Error sending to Google Script:', googleError);
-    //   }
-
       // Insert data into Supabase directly
       try {
         // Prepare data for insertion
