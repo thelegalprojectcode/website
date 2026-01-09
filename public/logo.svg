@@ -1,0 +1,17 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scales of Justice Symbol -->
+  <g id="logo">
+    <!-- Left scale -->
+    <path d="M8 18 L4 22 L12 22 Z" fill="currentColor" opacity="0.8"/>
+    <!-- Right scale -->
+    <path d="M24 18 L20 22 L28 22 Z" fill="currentColor" opacity="0.8"/>
+    <!-- Balance beam -->
+    <rect x="6" y="17" width="20" height="2" fill="currentColor"/>
+    <!-- Center post -->
+    <rect x="15" y="10" width="2" height="14" fill="currentColor"/>
+    <!-- Top circle -->
+    <circle cx="16" cy="8" r="3" fill="currentColor"/>
+    <!-- Base -->
+    <rect x="12" y="24" width="8" height="2" rx="1" fill="currentColor"/>
+  </g>
+</svg>
