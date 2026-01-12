@@ -7,9 +7,10 @@ import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
-import { Calendar, Users, Info, FileText, Gift, FileDown, Sparkles, CheckCircle2, Clock } from 'lucide-react';
+import { Calendar, Users, Info, FileText, Gift, FileDown, Sparkles, CheckCircle2, Clock, MessageSquare, Star } from 'lucide-react';
 import ScheduleCalendar from '../components/schedule/ScheduleCalendar';
 import ScheduleStats from '../components/schedule/ScheduleStats';
+import { Textarea } from '../components/ui/textarea';
 import { supabase } from '../../lib/supabase';
 
 // Disable static generation for this page
@@ -33,6 +34,17 @@ const ParentingScheduleVisualizer = () => {
   const [showPdfDialog, setShowPdfDialog] = useState(false);
   const [showPdfSuccess, setShowPdfSuccess] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Feedback system state
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackEmail, setFeedbackEmail] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [showFeedbackSuccess, setShowFeedbackSuccess] = useState(false);
+  const [allFeedback, setAllFeedback] = useState<any[]>([]);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+
   const [pdfFormData, setPdfFormData] = useState({
     fullName: '',
     email: '',
@@ -129,6 +141,36 @@ const ParentingScheduleVisualizer = () => {
     if (!isMounted || typeof window === 'undefined') return; // Wait for client-side mount
     localStorage.setItem('scheduleHolidays', JSON.stringify(holidays));
   }, [isMounted, holidays]);
+
+  // Fetch all feedback on mount
+  useEffect(() => {
+    if (!isMounted || typeof window === 'undefined') return;
+    fetchAllFeedback();
+  }, [isMounted]);
+
+  const fetchAllFeedback = async () => {
+    if (!supabase) return;
+    
+    setIsLoadingFeedback(true);
+    try {
+      const { data, error } = await supabase
+        .from('tools_feedback')
+        .select('*')
+        .eq('tool_name', 'parenting-schedule-visualizer')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching feedback:', error);
+      } else {
+        setAllFeedback(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    } finally {
+      setIsLoadingFeedback(false);
+    }
+  };
 
   const toggleHoliday = useCallback((id: string) => {
     setHolidays((prev: any[]) =>
@@ -531,6 +573,67 @@ const ParentingScheduleVisualizer = () => {
     }
   };
 
+  // Feedback submission handler
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!feedbackText.trim()) {
+      alert('Please provide feedback before submitting');
+      return;
+    }
+
+    if (feedbackRating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+
+    try {
+      if (supabase) {
+        const feedbackData = {
+          rating: feedbackRating,
+          feedback_text: feedbackText.trim(),
+          email: feedbackEmail.trim() || null,
+          tool_name: 'parenting-schedule-visualizer',
+          created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+          .from('tools_feedback')
+          .insert([feedbackData])
+          .select();
+
+        if (error) {
+          console.error('Supabase feedback insert error:', error);
+          alert('Failed to submit feedback. Please try again.');
+        } else {
+          console.log('Successfully submitted feedback:', data);
+          setShowFeedback(false);
+          setShowFeedbackSuccess(true);
+          
+          // Reset feedback form
+          setFeedbackRating(0);
+          setFeedbackText('');
+          setFeedbackEmail('');
+          
+          // Refresh feedback list
+          fetchAllFeedback();
+          
+          // Hide success message after 5 seconds
+          setTimeout(() => setShowFeedbackSuccess(false), 5000);
+        }
+      } else {
+        alert('Feedback system is temporarily unavailable. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback. Please try again.');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* <Header /> */}
@@ -832,9 +935,216 @@ const ParentingScheduleVisualizer = () => {
                 />
               </CardContent>
             </Card>
+
+            {/* Feedback Card */}
+            <Card className="shadow-lg border-2 border-purple-100">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-purple-600" />
+                  Help Us Improve
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    Your feedback helps us make this tool better for everyone. Share your thoughts anonymously!
+                  </p>
+                  <Button 
+                    onClick={() => setShowFeedback(true)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Provide Feedback
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* All Feedback Display */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-purple-600" />
+                    Community Feedback
+                  </div>
+                  <span className="text-sm font-normal text-gray-500">
+                    {allFeedback.length} {allFeedback.length === 1 ? 'review' : 'reviews'}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingFeedback ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                  </div>
+                ) : allFeedback.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>No feedback yet. Be the first to share your thoughts!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                    {allFeedback.map((feedback) => (
+                      <div 
+                        key={feedback.id}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= feedback.rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(feedback.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {feedback.feedback_text}
+                        </p>
+                        {feedback.email && (
+                          <div className="mt-2 text-xs text-gray-500 italic">
+                            - {feedback.email}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
+
+      {/* Feedback Success Message */}
+      {showFeedbackSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-in fade-in">
+          <Card className="bg-green-50 border-green-200 shadow-2xl max-w-md mx-4 animate-in zoom-in-95">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-900 text-lg mb-2">Thank You!</h3>
+                  <p className="text-sm text-green-800">
+                    Your feedback has been submitted successfully. We appreciate you taking the time to help us improve!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Feedback Dialog */}
+      <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-purple-600" />
+              Share Your Feedback
+            </DialogTitle>
+            <DialogDescription>
+              Help us improve the Parenting Schedule Visualizer. Your feedback is anonymous unless you provide your email.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleFeedbackSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>How would you rate this tool?</Label>
+              <div className="flex gap-2 justify-center py-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setFeedbackRating(star)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={`w-8 h-8 ${
+                        star <= feedbackRating
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="feedbackText">
+                Your Feedback <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="feedbackText"
+                placeholder="Tell us what you think about this tool. What did you like? What could be improved?"
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                required
+                rows={5}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="feedbackEmail">Email (Optional)</Label>
+              <Input
+                id="feedbackEmail"
+                type="email"
+                placeholder="your.email@example.com"
+                value={feedbackEmail}
+                onChange={(e) => setFeedbackEmail(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Provide your email if you'd like us to follow up with you
+              </p>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowFeedback(false)}
+                disabled={isSubmittingFeedback}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmittingFeedback}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                {isSubmittingFeedback ? (
+                  <>
+                    <span className="mr-2">Submitting...</span>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Submit Feedback
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* PDF Download Dialog */}
       <Dialog open={showPdfDialog} onOpenChange={setShowPdfDialog}>
