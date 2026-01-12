@@ -16,6 +16,7 @@ import { supabase } from '../../lib/supabase';
 export const dynamic = 'force-dynamic';
 
 const ParentingScheduleVisualizer = () => {
+  const [isMounted, setIsMounted] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [scheduleType, setScheduleType] = useState('alternating-weeks');
   const [childrenNames, setchildrenNames] = useState('');
@@ -51,8 +52,15 @@ const ParentingScheduleVisualizer = () => {
     parentBColor: '#c181a3'
   });
 
+  // Mark component as mounted to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Load all data (PDF form + Schedule config) from localStorage on mount
   useEffect(() => {
+    if (!isMounted || typeof window === 'undefined') return; // Wait for client-side mount
+    
     const savedFormData = localStorage.getItem('pdfFormData');
     if (savedFormData) {
       try {
@@ -71,10 +79,12 @@ const ParentingScheduleVisualizer = () => {
         console.error('Error loading saved form data:', error);
       }
     }
-  }, []);
+  }, [isMounted]);
 
   // Save all data (PDF form + Schedule config) to localStorage whenever any changes
   useEffect(() => {
+    if (!isMounted || typeof window === 'undefined') return; // Wait for client-side mount
+    
     const allData = {
       ...pdfFormData,
       startDate,
@@ -86,36 +96,39 @@ const ParentingScheduleVisualizer = () => {
       parentBColor
     };
     localStorage.setItem('pdfFormData', JSON.stringify(allData));
-  }, [pdfFormData, startDate, scheduleType, childrenNames, parentAName, parentBName, parentAColor, parentBColor]);
+  }, [isMounted, pdfFormData, startDate, scheduleType, childrenNames, parentAName, parentBName, parentAColor, parentBColor]);
 
   const currentYear = new Date().getFullYear();
-  const [holidays, setHolidays] = useState<any[]>(() => {
-    // Try to load from localStorage first
+  const [holidays, setHolidays] = useState<any[]>([
+    { id: 'thanksgiving', name: 'Thanksgiving', date: `${currentYear}-11-28`, enabled: false, parent: 'Parent 1' },
+    { id: 'christmas-eve', name: 'Christmas Eve', date: `${currentYear}-12-24`, enabled: false, parent: 'Parent 1' },
+    { id: 'christmas', name: 'Christmas Day', date: `${currentYear}-12-25`, enabled: false, parent: 'Parent 1' },
+    { id: 'new-years', name: "New Year's Day", date: `${currentYear + 1}-01-01`, enabled: false, parent: 'Parent 1' },
+    { id: 'mothers-day', name: "Mother's Day", date: `${currentYear}-05-11`, enabled: false, parent: 'Parent 1' },
+    { id: 'fathers-day', name: "Father's Day", date: `${currentYear}-06-15`, enabled: false, parent: 'Parent 1' },
+    { id: 'spring-break', name: 'Spring Break (week)', date: `${currentYear}-03-24`, enabled: false, parent: 'Parent 1' },
+    { id: 'summer-break', name: 'Summer Break (2 weeks)', date: `${currentYear}-07-01`, enabled: false, parent: 'Parent 1' },
+  ]);
+
+  // Load holidays from localStorage after mount
+  useEffect(() => {
+    if (!isMounted || typeof window === 'undefined') return;
+    
     const savedHolidays = localStorage.getItem('scheduleHolidays');
     if (savedHolidays) {
       try {
-        return JSON.parse(savedHolidays);
+        setHolidays(JSON.parse(savedHolidays));
       } catch (error) {
         console.error('Error loading saved holidays:', error);
       }
     }
-    // Default holidays if nothing saved
-    return [
-      { id: 'thanksgiving', name: 'Thanksgiving', date: `${currentYear}-11-28`, enabled: false, parent: 'Parent 1' },
-      { id: 'christmas-eve', name: 'Christmas Eve', date: `${currentYear}-12-24`, enabled: false, parent: 'Parent 1' },
-      { id: 'christmas', name: 'Christmas Day', date: `${currentYear}-12-25`, enabled: false, parent: 'Parent 1' },
-      { id: 'new-years', name: "New Year's Day", date: `${currentYear + 1}-01-01`, enabled: false, parent: 'Parent 1' },
-      { id: 'mothers-day', name: "Mother's Day", date: `${currentYear}-05-11`, enabled: false, parent: 'Parent 1' },
-      { id: 'fathers-day', name: "Father's Day", date: `${currentYear}-06-15`, enabled: false, parent: 'Parent 1' },
-      { id: 'spring-break', name: 'Spring Break (week)', date: `${currentYear}-03-24`, enabled: false, parent: 'Parent 1' },
-      { id: 'summer-break', name: 'Summer Break (2 weeks)', date: `${currentYear}-07-01`, enabled: false, parent: 'Parent 1' },
-    ];
-  });
+  }, [isMounted]);
 
   // Save holidays to localStorage whenever they change
   useEffect(() => {
+    if (!isMounted || typeof window === 'undefined') return; // Wait for client-side mount
     localStorage.setItem('scheduleHolidays', JSON.stringify(holidays));
-  }, [holidays]);
+  }, [isMounted, holidays]);
 
   const toggleHoliday = useCallback((id: string) => {
     setHolidays((prev: any[]) =>
@@ -720,8 +733,8 @@ const ParentingScheduleVisualizer = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value={parentAName}>{parentAName}</SelectItem>
-                            <SelectItem value={parentBName}>{parentBName}</SelectItem>
+                            <SelectItem value={parentAName || 'Parent 1'}>{parentAName || 'Parent 1'}</SelectItem>
+                            <SelectItem value={parentBName || 'Parent 2'}>{parentBName || 'Parent 2'}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
