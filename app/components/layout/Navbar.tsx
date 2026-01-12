@@ -29,22 +29,22 @@ const Navbar = () => {
 
         <nav className="hidden md:flex items-center gap-8">
           <a
-            href="#mission"
+            href="/"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Our Mission
+            Home
           </a>
           <a
-            href="#developers"
+            href="/tools-to-make"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            For Developers
+             Tools to Make
           </a>
           <a
-            href="#donate"
+            href="/foundation"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            Donate
+            Foundation
           </a>
         </nav>
 
